@@ -18,15 +18,15 @@ class PlataformaServiceTest {
     @BeforeEach
     void setUp() {
         service = new PlataformaService(new UsuarioRepository(), new VideojuegoRepository());
-        planBasic    = new PlanSuscripcion(TipoPlan.BASIC);
+        planBasic = new PlanSuscripcion(TipoPlan.BASIC);
         planAdvanced = new PlanSuscripcion(TipoPlan.ADVANCED);
         planPremium  = new PlanSuscripcion(TipoPlan.PREMIUM);
     }
 
     @Test
     @DisplayName("Registrar un usuario nuevo devuelve el usuario creado")
-    void registrarUsuario_exitoso() {
-        Usuario u = service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+    void registrarUsuario() {
+        Usuario u = service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
         assertNotNull(u);
         assertEquals("Ana García", u.getNombre());
         assertEquals(TipoPlan.BASIC, u.getPlanActivo().getTipo());
@@ -34,106 +34,106 @@ class PlataformaServiceTest {
 
     @Test
     @DisplayName("Registrar dos usuarios con el mismo email lanza excepción")
-    void registrarUsuario_emailDuplicado_lanzaExcepcion() {
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+    void registrarUsuario_emailDuplicado() {
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
         assertThrows(IllegalArgumentException.class,
-                () -> service.registrarUsuario("Otro", "ana@test.com", planBasic));
+                () -> service.registrarUsuario("Otro", "ana@gmail.com", planBasic));
     }
 
     @Test
     @DisplayName("Buscar usuario por email existente devuelve el usuario")
     void buscarUsuarioPorEmail_encontrado() {
-        service.registrarUsuario("Carlos", "carlos@test.com", planAdvanced);
-        assertTrue(service.buscarUsuarioPorEmail("carlos@test.com").isPresent());
+        service.registrarUsuario("Carlos", "carlos@gmail.com", planAdvanced);
+        assertTrue(service.buscarUsuarioPorEmail("carlos@gmail.com").isPresent());
     }
 
     @Test
     @DisplayName("Buscar usuario por email inexistente devuelve vacío")
-    void buscarUsuarioPorEmail_noEncontrado() {
-        assertTrue(service.buscarUsuarioPorEmail("noexiste@test.com").isEmpty());
+    void buscarUsuarioPorEmail() {
+        assertTrue(service.buscarUsuarioPorEmail("noexiste@gmail.com").isEmpty());
     }
 
     @Test
     @DisplayName("Cambiar plan actualiza correctamente el plan del usuario")
     void cambiarPlan_exitoso() {
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
-        service.cambiarPlan("ana@test.com", planPremium);
+        service.registrarUsuario("Ana García", "ana@gmailcom", planBasic);
+        service.cambiarPlan("ana@gmail.com", planPremium);
         assertEquals(TipoPlan.PREMIUM,
-                service.buscarUsuarioPorEmail("ana@test.com").get().getPlanActivo().getTipo());
+                service.buscarUsuarioPorEmail("ana@gmail.com").get().getPlanActivo().getTipo());
     }
 
     @Test
     @DisplayName("Iniciar partida válida incrementa el contador de partidas activas")
-    void iniciarPartida_valida_incrementaContador() {
+    void iniciarPartida_valida() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
 
-        Partida p = service.iniciarPartida("ana@test.com", "Minecraft");
+        Partida p = service.iniciarPartida("ana@gmail.com", "Minecraft");
         assertTrue(p.isActiva());
-        assertEquals(1, service.buscarUsuarioPorEmail("ana@test.com").get().getPartidasActivas());
+        assertEquals(1, service.buscarUsuarioPorEmail("ana@gmail.com").get().getPartidasActivas());
     }
 
     @Test
     @DisplayName("Iniciar partida excediendo el límite del plan lanza excepción")
-    void iniciarPartida_superaLimite_lanzaExcepcion() {
+    void iniciarPartida_superaLimite() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
-        service.iniciarPartida("ana@test.com", "Minecraft");
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.iniciarPartida("ana@gmail.com", "Minecraft");
 
         assertThrows(IllegalStateException.class,
-                () -> service.iniciarPartida("ana@test.com", "Minecraft"));
+                () -> service.iniciarPartida("ana@gmail.com", "Minecraft"));
     }
 
     @Test
     @DisplayName("Iniciar partida con juego no incluido en el plan lanza excepción")
-    void iniciarPartida_juegoNoEnCatalogo_lanzaExcepcion() {
+    void iniciarPartida_juegoNoEnCatalogo() {
         service.añadirVideojuego("CyberPunk", "RPG", 100);
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
         assertThrows(IllegalStateException.class,
-                () -> service.iniciarPartida("ana@test.com", "CyberPunk"));
+                () -> service.iniciarPartida("ana@gmail.com", "CyberPunk"));
     }
 
     @Test
     @DisplayName("Iniciar partida con velocidad insuficiente lanza excepción")
-    void iniciarPartida_velocidadInsuficiente_lanzaExcepcion() {
+    void iniciarPartida_velocidadInsuficiente() {
         Videojuego juegoHD = service.añadirVideojuego("UltraHD Game", "Acción", 200);
         planBasic.agregarVideojuego(juegoHD);
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
         assertThrows(IllegalStateException.class,
-                () -> service.iniciarPartida("ana@test.com", "UltraHD Game"));
+                () -> service.iniciarPartida("ana@gmail.com", "UltraHD Game"));
     }
 
     @Test
     @DisplayName("Finalizar partida activa decrementa el contador y la marca como inactiva")
-    void finalizarPartida_exitosa() {
+    void finalizarPartida() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
 
-        Partida p = service.iniciarPartida("ana@test.com", "Minecraft");
+        Partida p = service.iniciarPartida("ana@gmail.com", "Minecraft");
         service.finalizarPartida(p);
 
         assertFalse(p.isActiva());
-        assertEquals(0, service.buscarUsuarioPorEmail("ana@test.com").get().getPartidasActivas());
+        assertEquals(0, service.buscarUsuarioPorEmail("ana@gmail.com").get().getPartidasActivas());
     }
 
     @Test
     @DisplayName("Finalizar una partida ya finalizada lanza excepción")
-    void finalizarPartida_yaFinalizada_lanzaExcepcion() {
+    void finalizarPartida_yaFinalizada() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
 
-        Partida p = service.iniciarPartida("ana@test.com", "Minecraft");
+        Partida p = service.iniciarPartida("ana@gmail.com", "Minecraft");
         service.finalizarPartida(p);
         assertThrows(IllegalStateException.class, () -> service.finalizarPartida(p));
     }
 
     @Test
     @DisplayName("puedeJugar devuelve true cuando el juego está en catálogo y la velocidad es suficiente")
-    void puedeJugar_condicionesCorrectas_devuelveTrue() {
+    void puedeJugar_condicionesCorrectas() {
         Videojuego juego = new Videojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
         assertTrue(planBasic.puedeJugar(juego));
@@ -141,7 +141,7 @@ class PlataformaServiceTest {
 
     @Test
     @DisplayName("puedeJugar devuelve false cuando la velocidad mínima supera la del plan")
-    void puedeJugar_velocidadInsuficiente_devuelveFalse() {
+    void puedeJugar_velocidadInsuficiente() {
         Videojuego juegoHD = new Videojuego("UltraHD", "Acción", 200);
         planBasic.agregarVideojuego(juegoHD);
         assertFalse(planBasic.puedeJugar(juegoHD));
@@ -149,7 +149,7 @@ class PlataformaServiceTest {
 
     @Test
     @DisplayName("puedeJugar devuelve false cuando el juego no está en el catálogo")
-    void puedeJugar_noEnCatalogo_devuelveFalse() {
+    void puedeJugar_noEnCatalogo() {
         Videojuego juego = new Videojuego("Minecraft", "Sandbox", 30);
         assertFalse(planBasic.puedeJugar(juego));
     }
@@ -157,8 +157,8 @@ class PlataformaServiceTest {
     @Test
     @DisplayName("Listar usuarios devuelve todos los registrados")
     void listarUsuarios_devuelveTodos() {
-        service.registrarUsuario("Ana García", "ana@test.com", planBasic);
-        service.registrarUsuario("Luis Martínez", "luis@test.com", planPremium);
+        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.registrarUsuario("Luis Martínez", "luis@gmail.com", planPremium);
         assertEquals(2, service.listarUsuarios().size());
     }
 }
