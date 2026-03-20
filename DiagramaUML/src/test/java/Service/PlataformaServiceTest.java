@@ -1,15 +1,16 @@
-package test;
+package Service;
 
 import model.*;
-import repository.UsuarioRepository;
-import repository.VideojuegoRepository;
-import Service.PlataformaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import repository.UsuarioRepository;
+import repository.VideojuegoRepository;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlataformaServiceTest {
+
     private PlataformaService service;
     private PlanSuscripcion planBasic;
     private PlanSuscripcion planAdvanced;
@@ -26,18 +27,18 @@ class PlataformaServiceTest {
     @Test
     @DisplayName("Registrar un usuario nuevo devuelve el usuario creado")
     void registrarUsuario() {
-        Usuario u = service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        Usuario u = service.registrarUsuario("Marcel Abad", "marcel@gmail.com", planBasic);
         assertNotNull(u);
-        assertEquals("Ana García", u.getNombre());
+        assertEquals("Marcel Abad", u.getNombre());
         assertEquals(TipoPlan.BASIC, u.getPlanActivo().getTipo());
     }
 
     @Test
     @DisplayName("Registrar dos usuarios con el mismo email lanza excepción")
     void registrarUsuario_emailDuplicado() {
-        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.registrarUsuario("Alejandro Galazo", "alejandro@gmail.com", planBasic);
         assertThrows(IllegalArgumentException.class,
-                () -> service.registrarUsuario("Otro", "ana@gmail.com", planBasic));
+                () -> service.registrarUsuario("Otro", "alejandro@gmail.com", planBasic));
     }
 
     @Test
@@ -50,16 +51,16 @@ class PlataformaServiceTest {
     @Test
     @DisplayName("Buscar usuario por email inexistente devuelve vacío")
     void buscarUsuarioPorEmail() {
-        assertTrue(service.buscarUsuarioPorEmail("noexiste@gmail.com").isEmpty());
+        assertTrue(service.buscarUsuarioPorEmail("patricio@gmail.com").isEmpty());
     }
 
     @Test
     @DisplayName("Cambiar plan actualiza correctamente el plan del usuario")
     void cambiarPlan_exitoso() {
-        service.registrarUsuario("Ana García", "ana@gmailcom", planBasic);
-        service.cambiarPlan("ana@gmail.com", planPremium);
+        service.registrarUsuario("Juan Carlos", "juan@gmailcom", planBasic);
+        service.cambiarPlan("juan@gmail.com", planPremium);
         assertEquals(TipoPlan.PREMIUM,
-                service.buscarUsuarioPorEmail("ana@gmail.com").get().getPlanActivo().getTipo());
+                service.buscarUsuarioPorEmail("juan@gmail.com").get().getPlanActivo().getTipo());
     }
 
     @Test
@@ -67,11 +68,11 @@ class PlataformaServiceTest {
     void iniciarPartida_valida() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.registrarUsuario("Luciana García", "lucia@gmail.com", planBasic);
 
-        Partida p = service.iniciarPartida("ana@gmail.com", "Minecraft");
+        Partida p = service.iniciarPartida("lucia@gmail.com", "Minecraft");
         assertTrue(p.isActiva());
-        assertEquals(1, service.buscarUsuarioPorEmail("ana@gmail.com").get().getPartidasActivas());
+        assertEquals(1, service.buscarUsuarioPorEmail("lucia@gmail.com").get().getPartidasActivas());
     }
 
     @Test
@@ -100,9 +101,9 @@ class PlataformaServiceTest {
     void iniciarPartida_velocidadInsuficiente() {
         Videojuego juegoHD = service.añadirVideojuego("UltraHD Game", "Acción", 200);
         planBasic.agregarVideojuego(juegoHD);
-        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.registrarUsuario("Rodrigo Boto", "rodri@gmail.com", planBasic);
         assertThrows(IllegalStateException.class,
-                () -> service.iniciarPartida("ana@gmail.com", "UltraHD Game"));
+                () -> service.iniciarPartida("@gmail.com", "UltraHD Game"));
     }
 
     @Test
@@ -110,13 +111,13 @@ class PlataformaServiceTest {
     void finalizarPartida() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.registrarUsuario("Williams Infanzon", "willy@gmail.com", planBasic);
 
-        Partida p = service.iniciarPartida("ana@gmail.com", "Minecraft");
+        Partida p = service.iniciarPartida("willy@gmail.com", "Minecraft");
         service.finalizarPartida(p);
 
         assertFalse(p.isActiva());
-        assertEquals(0, service.buscarUsuarioPorEmail("ana@gmail.com").get().getPartidasActivas());
+        assertEquals(0, service.buscarUsuarioPorEmail("willy@gmail.com").get().getPartidasActivas());
     }
 
     @Test
@@ -124,9 +125,9 @@ class PlataformaServiceTest {
     void finalizarPartida_yaFinalizada() {
         Videojuego juego = service.añadirVideojuego("Minecraft", "Sandbox", 30);
         planBasic.agregarVideojuego(juego);
-        service.registrarUsuario("Ana García", "ana@gmail.com", planBasic);
+        service.registrarUsuario("Oscar Renilla", "oscar@gmail.com", planBasic);
 
-        Partida p = service.iniciarPartida("ana@gmail.com", "Minecraft");
+        Partida p = service.iniciarPartida("oscar@gmail.com", "Minecraft");
         service.finalizarPartida(p);
         assertThrows(IllegalStateException.class, () -> service.finalizarPartida(p));
     }
@@ -162,3 +163,4 @@ class PlataformaServiceTest {
         assertEquals(2, service.listarUsuarios().size());
     }
 }
+
